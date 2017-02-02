@@ -1,3 +1,5 @@
+
+
 #!/usr/bin/env python
 #
 # Copyright 2007 Google Inc.
@@ -16,8 +18,7 @@
 #
 import webapp2
 import re
-
-
+import cgi
 
 
 def page_builder(user_error, pass_error, verify_error, email_error):
@@ -28,8 +29,8 @@ def page_builder(user_error, pass_error, verify_error, email_error):
 
     username_input = '<input type = "text" name = "username">'
     password_input = '<input type = "password" name = "password">'
-    verpass_input = '<input type = "password" name = "verify">'
-    email_input = '<input type = "text" name = "email">'
+    verpass_input  = '<input type = "password" name = "verify">'
+    email_input    = '<input type = "text" name = "email">'
 
     submit = '<input type="submit" />'
 
@@ -47,7 +48,7 @@ def page_builder(user_error, pass_error, verify_error, email_error):
 
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 Password_RE = re.compile(r"^.{3,20}$")
-Email_RE = re.compile(r"^[\S]+@[\S]+.[\S]+$")
+Email_RE = re.compile(r"^[\S]+@[\S]+.[\S]$")
 
 def valid_username(username):
     return USER_RE.match(username)
@@ -63,26 +64,43 @@ class MainHandler(webapp2.RequestHandler):
         content = page_builder("","","","")
         self.response.write(content)
 
+
+
+
+
     def post(self):
         username = self.request.get("username")
+        username = cgi.escape(username)
         password = self.request.get("password")
-        verify = self.request.get("verify")
-        email = self.request.get("email")
+        password = cgi.escape(password)
+        verify   = self.request.get("verify")
+        verify   = cgi.escape(verify)
+        email    = self.request.get("email")
+        email    = cgi.escape(email)
 
-        if not valid_username(username):
-            content = page_builder('Invalid Username.',"","", "")
-
-        elif not valid_pass(password):
-            content = page_builder("",'Invalid password.',"", "")
-
-        elif password != verify:
-            content = page_builder("","","Passwords do not match.", "")
-
-        elif email != "" and not valid_email(email):
-            content = page_builder("","","","Invalid email.")
-
+        if (valid_email(email) or email == "") and password == verify and valid_pass(password) and valid_username(username):
+            content = "Welcome " + username
         else:
-            content = "Wecome " + username
+
+            error_user = ""
+            error_pass = ""
+            error_verify = ""
+            error_email = ""
+
+            if not valid_username(username):
+                error_user = "usename not valid."
+
+            if not valid_pass(password):
+                error_pass = "password not valid"
+
+            if password != verify:
+                error_verify = "passwords do not match"
+
+            if email != "" and not valid_email(email):
+                error_email = "email is not valid"
+
+            content = page_builder(error_user,error_pass,error_verify,error_email)
+
 
         self.response.write(content)
 
