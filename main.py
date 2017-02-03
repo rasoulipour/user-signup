@@ -48,7 +48,7 @@ def page_builder(user_error, pass_error, verify_error, email_error, u, p, v, e):
 
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 Password_RE = re.compile(r"^.{3,20}$")
-Email_RE = re.compile(r"^[\S]+@[\S]+.[\S]+$")
+Email_RE = re.compile(r"^[\S]+@[\S]+\.[\S]+$")
 
 def valid_username(username):
     return USER_RE.match(username)
@@ -97,7 +97,7 @@ class MainHandler(webapp2.RequestHandler):
                 error_verify = "passwords do not match"
                 verify = ""
 
-            if not valid_email(email):
+            if  email != "" or not valid_email(email):
                 error_email = "email is not valid"
                 email = ""
 
